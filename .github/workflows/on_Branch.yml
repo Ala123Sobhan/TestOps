@@ -39,7 +39,7 @@ jobs:
       - name: Calculate code coverage
         run: mvn jacoco:report "-DskipTests" "-Ddependency-check.skip=true"
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report
           path: target/site/jacoco/
@@ -71,7 +71,7 @@ jobs:
         run: mvn dependency-check:check
 
       - name: Upload Dependency Check Report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report
           path: |
@@ -108,7 +108,87 @@ jobs:
       - name: Build with Maven
         run: mvn clean install "-DskipTests" "-Djacoco.skip=true" "-Ddependency-check.skip=true"
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: java-app
           path: '${{ github.workspace }}/target/*.jar'
+
+  k6_load_test:
+    name: k6 Load Test
+    runs-on: ubuntu-latest
+#    needs: deploy_Backend_performance
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Run local k6 test
+        uses: grafana/k6-action@v0.2.0
+        with:
+          filename: ${{ github.workspace }}/src/test/K6/perftest.js
+          flags: --out json=results.json
+      - name: Upload performance test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: k6-report
+          path: results.json
+
+
+
+  lighthouse_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 20
+
+      - name: Install jq
+        run: sudo apt-get install jq
+
+      - name: Install Lighthouse
+        run: npm install -g lighthouse
+
+      - name: Run Lighthouse and check performance
+        run: |
+          lighthouse --output=json --output-path=./lighthouse_report.json --quiet --chrome-flags="--headless --no-sandbox" "https://www.blazedemo.com"
+          LIGHTHOUSE_SCORE=$(jq '.categories.performance.score * 100' ./lighthouse_report.json)
+          echo "Performance score: $LIGHTHOUSE_SCORE"
+          if [ $LIGHTHOUSE_SCORE -lt 60 ]; then
+            echo "error: Performance score is below 60. Blocking PR."
+            exit 1
+          fi
+
+      - name: Upload Lighthouse Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: ./lighthouse_report.json
+
+  run-selenium-tests:
+    runs-on: windows-latest
+    needs: [ lighthouse_check ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~\.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Install Firefox
+        run: |
+          choco install firefox
+
+      - name: Run Selenium tests
+        run: mvn test -Dtest=SeleniumTest
