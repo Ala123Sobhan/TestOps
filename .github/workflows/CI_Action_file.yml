@@ -28,7 +28,7 @@ jobs:
       - name: Merge master branch
         run: |
           git fetch origin master
-          git pull origin master
+#          git pull origin master
 #          git rebase origin/master
 
       - name: Run unit tests
@@ -53,7 +53,7 @@ jobs:
       - name: Merge master branch
         run: |
           git fetch origin master
-          git pull origin master
+#          git pull origin master
 #          git merge origin/master --allow-unrelated-histories
          
       - name: Calculate code coverage
@@ -84,7 +84,7 @@ jobs:
       - name: Merge master branch
         run: |
           git fetch origin master
-          git pull origin master
+#          git pull origin master
 #          git merge origin/master --allow-unrelated-histories
 
       - name: Cache OWASP Dependency Check Data
@@ -123,7 +123,7 @@ jobs:
       - name: Merge master branch
         run: |
           git fetch origin master
-          git pull origin master
+#          git pull origin master
 #          git merge origin/master --allow-unrelated-histories
 
       - name: Run Super-Linter
@@ -160,7 +160,7 @@ jobs:
       - name: Merge master branch
         run: |
           git fetch origin master
-          git pull origin master
+#          git pull origin master
 #          git merge origin/master --allow-unrelated-histories
          
       - name: Build with Maven
