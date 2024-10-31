@@ -28,7 +28,8 @@ jobs:
       - name: Merge master branch
         run: |
           git fetch origin master
-          git rebase origin/master
+          git pull origin master
+#          git rebase origin/master
 
       - name: Run unit tests
         run: mvn test -Dtest=CalculatorControllerCalculationTests
@@ -52,7 +53,8 @@ jobs:
       - name: Merge master branch
         run: |
           git fetch origin master
-          git merge origin/master --allow-unrelated-histories    
+          git pull origin master
+#          git merge origin/master --allow-unrelated-histories
          
       - name: Calculate code coverage
         run: mvn clean verify jacoco:report "-Ddependency-check.skip=true" "-DskipTests"
@@ -82,7 +84,8 @@ jobs:
       - name: Merge master branch
         run: |
           git fetch origin master
-          git merge origin/master --allow-unrelated-histories    
+          git pull origin master
+#          git merge origin/master --allow-unrelated-histories
 
       - name: Cache OWASP Dependency Check Data
         uses: actions/cache@v2
@@ -120,7 +123,8 @@ jobs:
       - name: Merge master branch
         run: |
           git fetch origin master
-          git merge origin/master --allow-unrelated-histories
+          git pull origin master
+#          git merge origin/master --allow-unrelated-histories
 
       - name: Run Super-Linter
         uses: github/super-linter@v4
@@ -156,7 +160,8 @@ jobs:
       - name: Merge master branch
         run: |
           git fetch origin master
-          git merge origin/master --allow-unrelated-histories
+          git pull origin master
+#          git merge origin/master --allow-unrelated-histories
          
       - name: Build with Maven
         run: mvn clean install "-DskipTests" "-Djacoco.skip=true" "-Ddependency-check.skip=true"
